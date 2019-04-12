@@ -12,7 +12,7 @@ namespace VirusTotalGUI
 {
     public partial class Form1 : Form
     {
-        private Stream myStream;
+        private Byte[] fileBytes = null;
 
         List<ScanResult> resultList = new List<ScanResult>();
         public Form1()
@@ -55,19 +55,21 @@ namespace VirusTotalGUI
         {
             try
             {
-                if ((myStream = this.openFileDialog1.OpenFile()) != null)
+                if (!(fileLocator.Text.EndsWith("png") || fileLocator.Text.EndsWith("jpg") || fileLocator.Text.EndsWith("gif")||fileLocator.Text.EndsWith("svg")))
+
                 {
-                    using (myStream)
+                    fileBytes = File.ReadAllBytes(fileLocator.Text);
+                    if (fileBytes != null)
                     {
                         string API_KEY = System.Environment.GetEnvironmentVariable("API_KEY", EnvironmentVariableTarget.Machine);
                         VirusTotal virusTotal = new VirusTotal(API_KEY);
-
                         //Use HTTPS instead of HTTP
                         virusTotal.UseTLS = true;
-                        if (myStream.Length > 0)
+                        virusTotal.UseTLS = true;
+                        if (fileBytes.Length > 0)
                         {
                             //Check if the file has been scanned before.
-                            FileReport report = await virusTotal.GetFileReportAsync(myStream);
+                            FileReport report = await virusTotal.GetFileReportAsync(fileBytes);
                             if (report.ResponseCode == FileReportResponseCode.Present)
                             {
                                 foreach (KeyValuePair<string, ScanEngine> scan in report.Scans)
@@ -87,6 +89,12 @@ namespace VirusTotalGUI
                             MessageBox.Show("Please Select a file having valid size");
                         }
                     }
+
+                }
+                else
+                {
+                    MessageBox.Show("Sorry We Currently Don't Support This Format, Next Release Will incorporat These Features");
+                    fileLocator.Text = "";
                 }
             }
             catch (Exception ex)
@@ -128,6 +136,7 @@ namespace VirusTotalGUI
         ScanResult scr = new ScanResult(filepath, res);
         resultList.Add(scr);
         fileLocator.Text = "";
+        fileBytes = null; 
         updateListView();
 
     }
@@ -150,14 +159,11 @@ namespace VirusTotalGUI
     {
         if (fileLocator.Text.Length > 0)
         {
-            if (File.Exists(fileLocator.Text))
-            {
-                myStream = File.Open(fileLocator.Text, FileMode.Open);
-            }
-            else
+            if (!File.Exists(fileLocator.Text))
             {
                 MessageBox.Show("Invalid Path");
             }
+
         }
     }
 
@@ -169,9 +175,22 @@ namespace VirusTotalGUI
             {
                 if (File.Exists(fileLocator.Text))
                 {
-                    myStream = File.Open(fileLocator.Text, FileMode.Open);
+                    if (fileBytes.Length > 0)
+                    {
+                        fileBytes = null;
+                    }
+                    if (!(fileLocator.Text.EndsWith("png") || fileLocator.Text.EndsWith("jpg") || fileLocator.Text.EndsWith("gif") || fileLocator.Text.EndsWith("svg")))
+                    {
 
-                }
+                        fileBytes = File.ReadAllBytes(fileLocator.Text);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Sorry We Currently Don't Support This Format, Next Release Will incorporat These Features");
+                        fileLocator.Text = "";
+                    }
+
+                    }
                 else
                 {
                     MessageBox.Show("Invalid Path");
