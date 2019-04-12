@@ -36,8 +36,8 @@
             this.scannedFileListView = new System.Windows.Forms.ListView();
             this.fileName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.dateOfScan = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.Result = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.checkSum = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Result = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // openFileDialog1
@@ -107,6 +107,7 @@
             this.scannedFileListView.TileSize = new System.Drawing.Size(10, 10);
             this.scannedFileListView.UseCompatibleStateImageBehavior = false;
             this.scannedFileListView.View = System.Windows.Forms.View.Details;
+            this.scannedFileListView.SelectedIndexChanged += new System.EventHandler(this.ScannedFileListView_SelectedIndexChanged);
             // 
             // fileName
             // 
@@ -118,15 +119,15 @@
             this.dateOfScan.Text = "Date of Scan";
             this.dateOfScan.Width = 112;
             // 
-            // Result
-            // 
-            this.Result.Text = "Results";
-            this.Result.Width = 475;
-            // 
             // checkSum
             // 
             this.checkSum.Text = "checksum";
             this.checkSum.Width = 161;
+            // 
+            // Result
+            // 
+            this.Result.Text = "Results";
+            this.Result.Width = 475;
             // 
             // Form1
             // 

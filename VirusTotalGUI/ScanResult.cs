@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 
@@ -10,15 +11,15 @@ namespace VirusTotalGUI
         private string _filePath;
         private DateTime _dateOfScan;
         private string _checksum;
-        private string _result;
-        public ScanResult(string filePath, string res = "")
+        private Dictionary<string,bool> _result;
+        public ScanResult(string filePath)
         {
             this._filePath = filePath;
             string [] temp= filePath.Split('/');
             this._fileName = temp.GetValue(temp.Length - 1).ToString();
             this._dateOfScan = DateTime.Now;
             this._checksum = CalculateMD5(filePath);
-            this._result = res;
+            this._result = new Dictionary<string, bool>();
         }
 
         public string FileName { get => _fileName; set => _fileName = value; }
@@ -34,8 +35,9 @@ namespace VirusTotalGUI
             _checksum = CalculateMD5(_filePath);
         }
 
-        public string Result { get => _result; set => _result = value; }
         public string FilePath { get => _filePath; set => _filePath = value; }
+        public Dictionary<string, bool> Result { get => _result; set => _result = value; }
+
         static string CalculateMD5(string filename)
         {
             using (var md5 = MD5.Create())
@@ -46,6 +48,41 @@ namespace VirusTotalGUI
                     return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
                 }
             }
+        }
+         public string VerifyMalicious()
+        {
+            String mal = "";
+            var result = this.Result;
+            bool isMalicious = false; 
+            foreach(KeyValuePair<string,bool> verify in result)
+            {
+                isMalicious = verify.Value | isMalicious;
+    
+            }
+            if (isMalicious == true)
+            {
+                mal = "Malicious";
+            }
+            else
+            {
+                mal = "Not Malicious";
+            }
+            return mal;
+        }
+        public override string ToString()
+        {
+            string name = this._fileName;
+            DateTime dos = this._dateOfScan;
+            string res = this.VerifyMalicious();
+            Dictionary<string, bool> dict = this._result;
+            string store = "Filename: " + name + "\n" + "FinalResult: " + res + "\n" + "DateofScan: " + dos.ToString("MM/dd/yyyy HH:mm:ss") + "detailResult: \n\n" ;
+            foreach (KeyValuePair<string, bool> verify in dict)
+            {
+                store += verify.Key + ":" + verify.Value.ToString() + "\n";
+
+            }
+            return store;
+
         }
     }
 }

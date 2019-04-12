@@ -55,16 +55,15 @@ namespace VirusTotalGUI
         {
             try
             {
-                if (!(fileLocator.Text.EndsWith("png") || fileLocator.Text.EndsWith("jpg") || fileLocator.Text.EndsWith("gif")||fileLocator.Text.EndsWith("svg")))
+                if (!(fileLocator.Text.EndsWith("png") || fileLocator.Text.EndsWith("jpg") || fileLocator.Text.EndsWith("gif")||fileLocator.Text.EndsWith("svg") || fileLocator.Text.EndsWith("txt")))
 
                 {
-                    fileBytes = File.ReadAllBytes(fileLocator.Text);
+                    fileBytes = File.ReadAllBytes(fileLocator.Text); 
                     if (fileBytes != null)
                     {
                         string API_KEY = System.Environment.GetEnvironmentVariable("API_KEY", EnvironmentVariableTarget.Machine);
                         VirusTotal virusTotal = new VirusTotal(API_KEY);
                         //Use HTTPS instead of HTTP
-                        virusTotal.UseTLS = true;
                         virusTotal.UseTLS = true;
                         if (fileBytes.Length > 0)
                         {
@@ -115,7 +114,7 @@ namespace VirusTotalGUI
         foreach (var res in resultList)
         {
 
-            var row = new string[] { res.FileName, res.DateOfScan.ToString("MM/dd/yyyy HH:mm:ss"), res.GetChecksum(), res.Result };
+            var row = new string[] { res.FileName, res.DateOfScan.ToString("MM/dd/yyyy HH:mm:ss"), res.GetChecksum(), res.VerifyMalicious() };
             var lvi = new ListViewItem(row);
             lvi.Tag = res;
             scannedFileListView.Items.Add(lvi);
@@ -125,15 +124,21 @@ namespace VirusTotalGUI
 
     public void addResultRecord(string filepath, FileReport report)
     {
-        string res = "";
-        if (report.Scans != null)
+            var resultDict = new Dictionary<string, bool>();
+            if (report.Scans != null)
         {
+                bool isMalicious = false;
+                
             foreach (KeyValuePair<string, ScanEngine> scan in report.Scans)
             {
-                res += string.Format("{0,-25} Detected: {1} \n", scan.Key, scan.Value.Detected);
+                    resultDict.Add(scan.Key, scan.Value.Detected);
+                //res += string.Format("{0,-25} Detected: {1} \n", scan.Key, scan.Value.Detected);
+                   
+
             }
         }
-        ScanResult scr = new ScanResult(filepath, res);
+        ScanResult scr = new ScanResult(filepath);
+        scr.Result = resultDict;
         resultList.Add(scr);
         fileLocator.Text = "";
         fileBytes = null; 
@@ -179,7 +184,7 @@ namespace VirusTotalGUI
                     {
                         fileBytes = null;
                     }
-                    if (!(fileLocator.Text.EndsWith("png") || fileLocator.Text.EndsWith("jpg") || fileLocator.Text.EndsWith("gif") || fileLocator.Text.EndsWith("svg")))
+                    if (!(fileLocator.Text.EndsWith("png") || fileLocator.Text.EndsWith("txt") || fileLocator.Text.EndsWith("jpg") || fileLocator.Text.EndsWith("gif") || fileLocator.Text.EndsWith("svg")))
                     {
 
                         fileBytes = File.ReadAllBytes(fileLocator.Text);
@@ -198,7 +203,16 @@ namespace VirusTotalGUI
             }
         }
     }
-}
+
+        private void ScannedFileListView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var selectedItem = (ScanResult)scannedFileListView.SelectedItems[0].Tag;
+            if (selectedItem != null)
+            {
+                MessageBox.Show(selectedItem.ToString());
+            }
+        }
+    }
 }
     
 
